@@ -32,6 +32,13 @@ class Database:
                 bilmos CHAR(4) NOT NULL CHECK (LENGTH(bilmos) = 4 AND bilmos GLOB '[0-9][0-9][0-9][0-9]')
             )
         ''')
+        self.cursor.execute('''
+           CREATE TABLE IF NOT EXISTS mosdesc (
+               bilmos CHAR(4) PRIMARY KEY 
+               desc TEXT NOT NULL,
+               FOREIGN KEY (bilmos) REFERENCES users(bilmos)
+           )
+        ''')
         self.conn.commit()
 
     def insert_user(self, rank, firstName, lastName, mi, edipi, dor, pmos, bilmos):
@@ -93,3 +100,38 @@ class Database:
         ''', (bilmos,))
         rows = self.cursor.fetchall()
         return [dict(row) for row in rows]
+    def insert_mos_desc(self, bilmos, desc):
+        """Insert a new mos description into the mosdesc table."""
+        self.cursor.execute('''
+            INSERT INTO mosdesc (bilmos, desc)
+            VALUES (?, ?)
+        ''', (bilmos, desc))
+        self.conn.commit()
+    def update_mos_desc(self, bilmos, desc):
+        """Update a mos description by bilmos."""
+        self.cursor('''
+            UPDATE mosdesc
+            SET desc = ?
+            WHERE bilmos = ?
+        ''', (desc, bilmos))
+        self.conn.commit()
+    def delete_mos_desc(self, bilmos):
+        """Delete a mos description by bilmos."""
+        self.cursor.execute('''
+            DELETE FROM mosdesc
+            WHERE bilmos = ?
+        ''', (bilmos,))
+        self.conn.commit()
+    def get_mos_desc_by_bilmos(self, bilmos):
+        """Get a mos description by bilmos, return as dictionary."""
+        self.cursor.execute('''
+            SELECT * FROM mosdesc
+            WHERE bilmos = ?
+        ''', (bilmos,))
+        return dict(self.cursor.fetchone()) if self.cursor.fetchone() else None
+    def get_all_mos_desc(self):
+        """Get all mos descriptions, return as list of dictionaries."""
+        self.cursor.execute('''
+            SELECT * FROM mosdesc
+        ''')
+        return [dict(row) for row in self.cursor.fetchall()]

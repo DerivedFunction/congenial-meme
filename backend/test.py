@@ -132,6 +132,89 @@ class ApiTestCLI(cmd.Cmd):
             self._print_response(response)
         except requests.RequestException as e:
             print(f"Error: {e}")
+            
+    def do_get_all_mos_desc(self, arg):
+        """Fetch all mos descriptions: get_all_mos_desc"""
+        try:
+            response = requests.get(f"{self.base_url}/mosdesc")
+            response.raise_for_status()
+            self._print_response(response)
+        except requests.RequestException as e:
+            print(f"Error: {e}")
+    def do_get_mos_desc_by_bilmos(self, arg):
+        """Fetch a mos description by bilmos: get_mos_desc_by_bilmos"""
+        if not arg:
+            print("Error: Please provide a bilmos")
+            return
+        try:
+            response = requests.get(f"{self.base_url}/mosdesc/{arg}")
+            response.raise_for_status()
+            self._print_response(response)
+        except requests.RequestException as e:
+            print(f"Error: {e}")
+    def do_add_mos_desc(self, arg):
+        """Add a new mos description: add_mos_desc"""
+        print("Enter mos description details:")
+        bilmos = input("BILMOS (4 digits): ")
+        desc = input("Description: ")
+
+        data = {
+            "bilmos": bilmos,
+            "desc": desc
+        }
+
+        try:
+            response = requests.post(f"{self.base_url}/mosdesc", json=data)
+            response.raise_for_status()
+            self._print_response(response)
+        except requests.RequestException as e:
+            print(f"Error: {e}")
+    def do_update_mos_desc(self, arg):
+        """Update a mos description by bilmos: update_mos_desc <bilmos>"""
+        if not arg:
+            print("Error: Please provide a bilmos")
+            return
+        print(f"Enter updated details for mos description with bilmos {arg}:")
+        desc = input("Description: ")
+
+        data = {
+            "desc": desc
+        }
+
+        try:
+            response = requests.put(f"{self.base_url}/mosdesc/{arg}", json=data)
+            response.raise_for_status()
+            self._print_response(response)
+        except requests.RequestException as e:
+            print(f"Error: {e}")
+    
+    def do_delete_mos_desc(self, arg):
+        """Delete a mos description by bilmos: delete_mos_desc <bilmos>"""
+        if not arg:
+            print("Error: Please provide a bilmos")
+            return
+        try:
+            response = requests.delete(f"{self.base_url}/mosdesc/{arg}")
+            response.raise_for_status()
+            self._print_response(response)
+        except requests.RequestException as e:
+            print(f"Error: {e}")
+    
+    def do_fill_counseling(self, arg):
+        """Fill the counseling form: fill_counseling"""
+        try:
+            # Ask EDIPI of reported on
+            edipi = input("Enter EDIPI of reported on: ")
+            # Ask EDIPI of senior
+            senior_edipi = input("Enter EDIPI of senior: ")
+
+            
+            response=requests.post(f"{self.base_url}/fill_counseling")
+            response.raise_for_status()
+            self._print_response(response)
+        except requests.RequestException as e:
+            print(f"Error: {e}")
+
 
     def do_exit(self, arg):
         """Exit the CLI"""

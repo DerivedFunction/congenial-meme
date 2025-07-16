@@ -1,3 +1,4 @@
 flask
 requests
+pypdf
 # Add any other dependencies here, one per line
