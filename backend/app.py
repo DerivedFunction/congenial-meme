@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, render_template
 from db.database import Database
 import sqlite3
 
@@ -7,7 +7,7 @@ db = Database()
 
 @app.route("/")
 def hello_world():
-    return "Hello World!"
+    return "Hello"
 
 @app.route('/users', methods=['GET'])
 def get_all_users():
@@ -73,6 +73,19 @@ def delete_user(edipi):
     db.delete_user(edipi)
     db.close()
     return jsonify({"message": "User deleted successfully"})
+@app.route('/users/rank/<rank>', methods=['GET'])
+def get_users_by_rank(rank):
+    db.connect()
+    rank = rank.upper()
+    users = db.get_all_users_by_rank(rank)
+    db.close()
+    return jsonify(users)
+@app.route('/users/mos/<bilmos>', methods=['GET'])
+def get_users_by_mos(bilmos):
+    db.connect()
+    users = db.get_all_users_by_mos(bilmos)
+    db.close()
+    return jsonify(users)
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)

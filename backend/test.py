@@ -51,10 +51,10 @@ class ApiTestCLI(cmd.Cmd):
         bilmos = input("BILMOS (4 digits): ")
 
         data = {
-            "rank": rank,
-            "firstName": firstName,
-            "lastName": lastName,
-            "mi": mi or "",
+            "rank": rank.upper(),
+            "firstName": firstName.upper(),
+            "lastName": lastName.upper(),
+            "mi": mi.upper() or "",
             "edipi": edipi,
             "dor": int(dor) if dor else 0,
             "pmos": pmos,
@@ -110,6 +110,28 @@ class ApiTestCLI(cmd.Cmd):
             self._print_response(response)
         except requests.RequestException as e:
             print(f"Error: {e}")
+    def do_get_users_by_rank(self, arg):
+        """Fetch all users by rank: get_users_by_rank <rank>"""
+        if not arg:
+            print("Error: Please provide a rank")
+            return
+        try:
+            response = requests.get(f"{self.base_url}/users/rank/{arg}")
+            response.raise_for_status()
+            self._print_response(response)
+        except requests.RequestException as e:
+            print(f"Error: {e}")
+    def do_get_users_by_mos(self, arg):
+        """Fetch all users by bilmos: get_users_by_mos <bilmos>"""
+        if not arg:
+            print("Error: Please provide a bilmos")
+            return
+        try:
+            response = requests.get(f"{self.base_url}/users/mos/{arg}")
+            response.raise_for_status()
+            self._print_response(response)
+        except requests.RequestException as e:
+            print(f"Error: {e}")
 
     def do_exit(self, arg):
         """Exit the CLI"""
@@ -119,6 +141,6 @@ class ApiTestCLI(cmd.Cmd):
     def do_quit(self, arg):
         """Exit the CLI"""
         return self.do_exit(arg)
-
+     
 if __name__ == '__main__':
     ApiTestCLI().cmdloop()
