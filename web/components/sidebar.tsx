@@ -5,12 +5,15 @@ import menu_open from "../src/images/menu_open.svg";
 import menu from "../src/images/menu.svg";
 import new_chat from "../src/images/new_chat.svg";
 import database from "../src/images/database.svg";
+import profile from "../src/images/profile.svg";
 interface SidebarProps {
   expand: boolean;
   setExpand: (expand: boolean) => void;
   isHovered: boolean;
   setIsHovered: (isHovered: boolean) => void;
-  setActiveComponent: Dispatch<SetStateAction<"newTask" | "manageDB">>;
+  setActiveComponent: Dispatch<
+    SetStateAction<"newTask" | "manageDB" | "profilePage">
+  >;
 }
 
 const Sidebar: React.FC<SidebarProps> = ({
@@ -20,6 +23,10 @@ const Sidebar: React.FC<SidebarProps> = ({
   setIsHovered,
   setActiveComponent,
 }) => {
+  const user = JSON.parse(localStorage.getItem("user") || "{}");
+  const lastName = user.lastName || "";
+  const rank = user.rank || "";
+  const fullName = `${rank} ${lastName}`;
   return (
     <>
       <div
@@ -58,20 +65,30 @@ const Sidebar: React.FC<SidebarProps> = ({
               />
             </div>
           </div>
-          <div className="pt-10">
-            <NavItem
-              image={new_chat}
-              text={"New Task"}
-              expand={expand}
-              onClick={() => setActiveComponent("newTask")}
-            />
-            <NavItem
-              image={database}
-              text={"Manage SQLite DB"}
-              expand={expand}
-              onClick={() => setActiveComponent("manageDB")}
-            />
+          <div className="pt-10 h-full flex flex-col justify-between">
+            <div className="">
+              <NavItem
+                image={new_chat}
+                text={"New Task"}
+                expand={expand}
+                onClick={() => setActiveComponent("newTask")}
+              />
+              <NavItem
+                image={database}
+                text={"Manage SQLite DB"}
+                expand={expand}
+                onClick={() => setActiveComponent("manageDB")}
+              />
+            </div>
           </div>
+          {/** Profile Icon on bottom */}
+
+          <NavItem
+            image={profile}
+            text={fullName}
+            expand={expand}
+            onClick={() => setActiveComponent("profilePage")}
+          />
         </div>
       </div>
       {/* Overlay for mobile */}

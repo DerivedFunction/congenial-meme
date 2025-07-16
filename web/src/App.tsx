@@ -1,13 +1,14 @@
 import { useState, type JSX } from "react";
 import Sidebar from "./../components/sidebar";
 import DatabasePage from "./../pages/database";
+import ProfilePage from "./../pages/profile";
 import menu from "./images/menu.svg";
 import "./App.css";
 
 function App() {
   const [expand, setExpand] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
-  type ComponentKey = "newTask" | "manageDB";
+  type ComponentKey = "newTask" | "manageDB" | "profilePage";
   const [activeComponent, setActiveComponent] =
     useState<ComponentKey>("newTask");
 
@@ -15,6 +16,7 @@ function App() {
   const components: Record<ComponentKey, JSX.Element> = {
     newTask: <></>,
     manageDB: <DatabasePage />,
+    profilePage: <ProfilePage />,
     // Add other components here
   };
   return (
