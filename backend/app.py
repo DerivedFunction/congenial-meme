@@ -157,7 +157,6 @@ def fill_counseling():
     if response['status'] == 'error':
         return jsonify(response), 400
     
-    print("Response:", response)
     return send_file(
         BytesIO(doc_bytes),
         mimetype='application/vnd.openxmlformats-officedocument.wordprocessingml.document',
