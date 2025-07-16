@@ -41,12 +41,12 @@ function App() {
           setActiveComponent={setActiveComponent}
         />
         <main
-          className={`flex-1 transition-all duration-300 overflow-y-auto flex flex-col justify-between ${
+          className={`flex-1 transition-all duration-300 flex flex-col justify-between overflow-hidden ${
             expand ? "md:ml-64" : "md:ml-12"
           }`}
         >
-          <div className="flex items-start justify-center p-4 flex-1">
-            <div className="w-full max-w-3xl space-y-3 py-12">
+          <div className="flex items-start justify-center p-4 flex-1 overflow-y-auto">
+            <div className="w-full max-w-3xl space-y-3 py-12 ">
               {components[activeComponent]}
             </div>
           </div>
