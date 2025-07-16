@@ -9,8 +9,9 @@ app = Flask(__name__)
 db = Database()
 
 @app.route("/")
-def hello_world():
-    return "Hello"
+def home():
+    # Return static/index.html
+    return render_template("index.html")
 
 @app.route('/users', methods=['GET'])
 def get_all_users():

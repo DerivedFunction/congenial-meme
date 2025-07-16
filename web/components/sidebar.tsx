@@ -1,5 +1,10 @@
 import React, { type Dispatch, type SetStateAction } from "react";
 import NavItem from "./nav-item";
+import menu_close from "../src/images/menu_close.svg";
+import menu_open from "../src/images/menu_open.svg";
+import menu from "../src/images/menu.svg";
+import new_chat from "../src/images/new_chat.svg";
+import database from "../src/images/database.svg";
 interface SidebarProps {
   expand: boolean;
   setExpand: (expand: boolean) => void;
@@ -32,13 +37,7 @@ const Sidebar: React.FC<SidebarProps> = ({
               className="group relative flex items-center justify-center hover:bg-gray-500/20 transition-all duration-300 h-9 w-9 aspect-square rounded-lg cursor-pointer"
             >
               <img
-                src={
-                  expand
-                    ? "menu_close.svg"
-                    : isHovered
-                    ? "./menu_open.svg"
-                    : "./menu.svg"
-                }
+                src={expand ? menu_close : isHovered ? menu_open : menu}
                 width={20}
                 height={20}
                 alt="Toggle menu"
@@ -50,7 +49,7 @@ const Sidebar: React.FC<SidebarProps> = ({
           <div className="md:hidden flex justify-end pr-2">
             <div className="group relative flex items-center justify-center hover:bg-gray-500/20 transition-all duration-300 h-9 w-9 aspect-square rounded-lg cursor-pointer">
               <img
-                src="menu_close.svg"
+                src={menu_close}
                 width={20}
                 height={20}
                 alt="Close menu"
@@ -61,13 +60,13 @@ const Sidebar: React.FC<SidebarProps> = ({
           </div>
           <div className="pt-10">
             <NavItem
-              image={"new_chat.svg"}
+              image={new_chat}
               text={"New Task"}
               expand={expand}
               onClick={() => setActiveComponent("newTask")}
             />
             <NavItem
-              image={"database.svg"}
+              image={database}
               text={"Manage SQLite DB"}
               expand={expand}
               onClick={() => setActiveComponent("manageDB")}

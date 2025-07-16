@@ -1,6 +1,7 @@
 import { useState, type JSX } from "react";
 import Sidebar from "./../components/sidebar";
 import DatabasePage from "./../pages/database";
+import menu from "./images/menu.svg";
 import "./App.css";
 
 function App() {
@@ -25,12 +26,7 @@ function App() {
               onClick={() => setExpand(true)}
               className="flex items-center justify-center h-9 w-9 rounded-lg hover:bg-gray-500/20 transition-all duration-300"
             >
-              <img
-                src="./menu.svg"
-                width={20}
-                height={20}
-                className="dark:invert"
-              />
+              <img src={menu} width={20} height={20} className="dark:invert" />
             </button>
           )}
         </div>
