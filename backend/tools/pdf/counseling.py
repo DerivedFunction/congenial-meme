@@ -2,6 +2,13 @@ import pypdf
 import json
 from io import BytesIO
 from typing import Dict, Union, Tuple
+from dotenv import load_dotenv
+import os
+
+load_dotenv("../../.env")  # Loads the .env file
+
+URL = os.getenv("URL")
+
 
 def fill_pdf_forms(input_pdf_path: str, json_data: str) -> Tuple[bytes, Dict[str, Union[str, list]]]:
     """
@@ -10,11 +17,57 @@ def fill_pdf_forms(input_pdf_path: str, json_data: str) -> Tuple[bytes, Dict[str
     Args:
         input_pdf_path (str): Path to the input PDF file.
         json_data (str): JSON string mapping field names to new values.
+            json_data:
+            {
+                "DOR": 
+                "RANK":
+                "EDIPI":
+                "MI":
+                "First Name":
+                "Last Name":
+                "PMOS":
+                "BILMOS":
+                "Occasion":
+                "PC From":
+                "PC To":
+                "Last Name RS":
+                "First Name RS":
+                "MI RS":
+                "EDIPI RS":
+                "RANK RS":
+                "Billet Title":
+                "Signature RS": None
+                "Date RS": None
+                "Signature": None
+                "Date": None
+                " TOPICS DISSCUSSED":
+                " MOSBILLET DESCRIPTION": None
+                " MAJOR ACCOMPLISHMENTS  SIGNIFICANT EVENTS THIS PERIOD":
+                " PREFORMANCE EVALUATION THIS PERIOD":
+                " TASKS ASSIGNED NEXT PERIOD  GOALS":
+                " ADDITIONAL COMMENTS":
+            }
     
     Returns:
         Tuple[bytes, Dict]: (PDF byte stream, response metadata with status and messages).
     """
     response = {"status": "success", "messages": []}
+    
+    # Send a request to /mosdesc/<BILMOS> to get the MOS Description
+    try:
+        import requests
+        response_mosdesc = requests.get(f"{URL}/mosdesc/{field_values['BILMOS']}")
+        if response_mosdesc.status_code == 200:
+            mosdesc_data = response_mosdesc.json()
+            if 'desc' in mosdesc_data:
+                field_values[' MOSBILLET DESCRIPTION'] = mosdesc_data['desc']
+        else:
+            response["status"] = "error"
+            response["messages"].append("Failed to fetch MOS Description.")
+    except Exception as e:
+        response["status"] = "error"
+        response["messages"].append(f"Failed to fetch MOS Description: {str(e)}")
+        return b"", response
     
     try:
         # Parse JSON input
@@ -89,6 +142,8 @@ def fill_pdf_forms(input_pdf_path: str, json_data: str) -> Tuple[bytes, Dict[str
             if field_name in field_values and not (field_flags & 1):
                 try:
                     new_value = str(field_values[field_name])
+                    if new_value is None:
+                        continue
                     if field_type == '/Tx':  # Textbox (single-line or multiline)
                         field.update({pypdf.generic.NameObject('/V'): pypdf.generic.TextStringObject(new_value)})
                     elif field_type == '/Btn':  # Checkbox or radio button

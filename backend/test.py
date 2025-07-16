@@ -1,6 +1,12 @@
 import cmd
 import requests
 import json
+from dotenv import load_dotenv
+import os
+
+load_dotenv(".env")  # Loads the .env file
+
+URL = os.getenv("URL")
 
 class ApiTestCLI(cmd.Cmd):
     intro = "Welcome to the Flask API Test CLI. Type 'help' or '?' to list commands.\n"
@@ -8,7 +14,7 @@ class ApiTestCLI(cmd.Cmd):
 
     def __init__(self):
         super().__init__()
-        self.base_url = "http://localhost:5000"
+        self.base_url = URL
 
     def _print_response(self, response):
         """Pretty-print the HTTP response."""

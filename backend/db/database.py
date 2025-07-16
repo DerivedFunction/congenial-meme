@@ -34,7 +34,7 @@ class Database:
         ''')
         self.cursor.execute('''
            CREATE TABLE IF NOT EXISTS mosdesc (
-               bilmos CHAR(4) PRIMARY KEY 
+               bilmos CHAR(4) PRIMARY KEY CHECK (LENGTH(bilmos) = 4 AND bilmos GLOB '[0-9][0-9][0-9][0-9]'),
                desc TEXT NOT NULL,
                FOREIGN KEY (bilmos) REFERENCES users(bilmos)
            )
