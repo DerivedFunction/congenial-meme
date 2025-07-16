@@ -153,7 +153,6 @@ def fill_counseling():
     
     # Process the document
     doc_bytes, response = edit_word_tables("./static/counseling.docx", json.dumps(json_data))
-    print(response)
     if response['status'] == 'error':
         return jsonify(response), 400
     
