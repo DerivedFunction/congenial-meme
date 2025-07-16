@@ -210,12 +210,79 @@ class ApiTestCLI(cmd.Cmd):
         """Fill the counseling form: fill_counseling"""
         try:
             # Ask EDIPI of reported on
-            edipi = input("Enter EDIPI of reported on: ")
+            edipi = "1631875455"
             # Ask EDIPI of senior
-            senior_edipi = input("Enter EDIPI of senior: ")
-
+            senior_edipi = "1234567890"
+            senior_billet = "safsdfsadfsag"
+            # Fetch user
+            response = requests.get(f"{self.base_url}/users/{edipi}")
+            response.raise_for_status()
+            user = response.json()
             
-            response=requests.post(f"{self.base_url}/fill_counseling")
+            # Fetch senior
+            response = requests.get(f"{self.base_url}/users/{senior_edipi}")
+            response.raise_for_status()
+            senior = response.json()
+            print(user)
+            print(senior)
+            # Ask for occasion
+            occasion = "adafsdf"
+
+            # Ask for PeriodFrom
+            period_from = "asdf"
+
+            # Ask for PeriodTo
+            period_to = "asdfa"
+
+            # Ask for topics
+            topics = "safasfsa"
+            
+            # Ask for events
+            events = "asfsdfa"
+            
+            # Ask for eval
+            eval = "asdfsdfasdf"
+            
+            # Ask for goals
+            goals = "afasdfsadf"
+            
+            # Ask for comments
+            comments = "asfsafasdf"
+            
+            # Fetch MOS description
+            response = requests.get(f"{self.base_url}/mosdesc/{user.get('bilmos')}")
+            response.raise_for_status()
+            mos_desc = response.json()
+            
+            # Create JSON data
+            
+            data = {
+                "EDIT_lastName": user.get('lastName'),
+                "EDIT_firstName": user.get('firstName'),
+                "Edit_MI": len(user.get('mi')) > 0 and user.get('mi') or "",
+                "EDIT_EDIPI": user.get('edipi'),
+                "EDIT_RANK": user.get('rank'),
+                "EDIT_DOR": user.get('dor'),
+                "EDIT_PMOS": user.get('pmos'),
+                "EDIT_BILMOS": user.get('bilmos'),
+                "EDIT_OCCASION": user.get('occasion'),
+                "EDIT_perFrom": user.get('periodFrom'),
+                "EDIT_perTo": user.get('periodTo'),
+                "EDIT_sLastName": senior.get('lastName'),
+                "EDIT_sFirstName": senior.get('firstName'),
+                "EDIT_sMI": len(senior.get('mi')) > 0 and senior.get('mi') or "",
+                "EDIT_sEDIPI": senior.get('edipi'),
+                "EDIT_sRank": senior.get('rank'),
+                "EDIT_Billet": senior.get('billet'),
+                "EDIT_TOPICS": topics,
+                "EDIT_EVENTS": events,
+                "EDIT_MOSDESC": mos_desc.get('desc'),
+                "EDIT_EVAL": eval,
+                "EDIT_TASKS": goals,
+                "EDIT_COMMENTS": comments
+            }
+           
+            response=requests.post(f"{self.base_url}/fill_counseling", json=data)
             response.raise_for_status()
             self._print_response(response)
         except requests.RequestException as e:

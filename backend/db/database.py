@@ -94,6 +94,7 @@ class Database:
 
     def get_all_users_by_mos(self, bilmos):
         """Get all users by bilmos, return as list of dictionaries."""
+        bilmos = str(bilmos)
         self.cursor.execute('''
             SELECT * FROM users
             WHERE bilmos = ?
@@ -102,6 +103,7 @@ class Database:
         return [dict(row) for row in rows]
     def insert_mos_desc(self, bilmos, desc):
         """Insert a new mos description into the mosdesc table."""
+        bilmos = str(bilmos)
         self.cursor.execute('''
             INSERT INTO mosdesc (bilmos, desc)
             VALUES (?, ?)
@@ -109,6 +111,7 @@ class Database:
         self.conn.commit()
     def update_mos_desc(self, bilmos, desc):
         """Update a mos description by bilmos."""
+        bilmos = str(bilmos)
         self.cursor('''
             UPDATE mosdesc
             SET desc = ?
@@ -117,18 +120,21 @@ class Database:
         self.conn.commit()
     def delete_mos_desc(self, bilmos):
         """Delete a mos description by bilmos."""
+        bilmos = str(bilmos)
         self.cursor.execute('''
             DELETE FROM mosdesc
             WHERE bilmos = ?
         ''', (bilmos,))
         self.conn.commit()
     def get_mos_desc_by_bilmos(self, bilmos):
-        """Get a mos description by bilmos, return as dictionary."""
+        """Get MOS description by bilmos, return as dictionary."""
+        bilmos = str(bilmos)
         self.cursor.execute('''
             SELECT * FROM mosdesc
             WHERE bilmos = ?
         ''', (bilmos,))
-        return dict(self.cursor.fetchone()) if self.cursor.fetchone() else None
+        row = self.cursor.fetchone()
+        return dict(row) if row else None
     def get_all_mos_desc(self):
         """Get all mos descriptions, return as list of dictionaries."""
         self.cursor.execute('''

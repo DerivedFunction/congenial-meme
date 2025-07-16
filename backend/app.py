@@ -1,8 +1,9 @@
 from flask import Flask, jsonify, request, render_template, send_file
 from io import BytesIO
-from tools.pdf.counseling import fill_pdf_forms
+from tools.doc import edit_word_tables
 from db.database import Database
 import sqlite3
+import json
 
 app = Flask(__name__)
 db = Database()
@@ -85,6 +86,7 @@ def get_users_by_rank(rank):
 @app.route('/users/mos/<bilmos>', methods=['GET'])
 def get_users_by_mos(bilmos):
     db.connect()
+    bilmos = str(bilmos)
     users = db.get_all_users_by_mos(bilmos)
     db.close()
     return jsonify(users)
@@ -99,6 +101,7 @@ def get_all_mos_desc():
 @app.route('/mosdesc/<bilmos>', methods=['GET'])
 def get_mos_desc_by_bilmos(bilmos):
     db.connect()
+    bilmos = str(bilmos)
     mos_desc = db.get_mos_desc_by_bilmos(bilmos)
     db.close()
     if mos_desc:
@@ -122,6 +125,7 @@ def insert_mos_desc():
 def update_mos_desc(bilmos):
     data = request.get_json()
     db.connect()
+    bilmos = str(bilmos)
     try:
         db.update_mos_desc(
             bilmos,
@@ -135,6 +139,7 @@ def update_mos_desc(bilmos):
 
 @app.route('/mosdesc/<bilmos>', methods=['DELETE'])
 def delete_mos_desc(bilmos):
+    bilmos = str(bilmos)
     db.connect()
     db.delete_mos_desc(bilmos)
     db.close()
@@ -142,17 +147,22 @@ def delete_mos_desc(bilmos):
 
 @app.route('/fill_counseling', methods=['POST'])
 def fill_counseling():
-    json_data = request.get_data(as_text=True)
-    pdf_bytes, response = fill_pdf_forms('../../static/counseling.pdf', json_data)
     
+    # Get JSON data
+    json_data = request.get_json()
+    
+    # Process the document
+    doc_bytes, response = edit_word_tables("./static/counseling.docx", json.dumps(json_data))
+    print(response)
     if response['status'] == 'error':
         return jsonify(response), 400
     
+    print("Response:", response)
     return send_file(
-        BytesIO(pdf_bytes),
-        mimetype='application/pdf',
+        BytesIO(doc_bytes),
+        mimetype='application/vnd.openxmlformats-officedocument.wordprocessingml.document',
         as_attachment=True,
-        download_name='filled_form.pdf'
+        download_name='filled_counseling.docx'
     )
 
 if __name__ == '__main__':

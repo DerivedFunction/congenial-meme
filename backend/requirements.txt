@@ -1,5 +1,5 @@
 flask
 requests
-pypdf
+python-docx
 python-dotenv
 # Add any other dependencies here, one per line
