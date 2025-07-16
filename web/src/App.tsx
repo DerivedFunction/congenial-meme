@@ -2,6 +2,7 @@ import { useState, type JSX } from "react";
 import Sidebar from "./../components/sidebar";
 import DatabasePage from "./../pages/database";
 import ProfilePage from "./../pages/profile";
+import PromptBox from "./../components/prompt-box";
 import menu from "./images/menu.svg";
 import "./App.css";
 
@@ -44,7 +45,14 @@ function App() {
             expand ? "md:ml-64" : "md:ml-12"
           }`}
         >
-          {components[activeComponent]}
+          <div className="flex items-start justify-center p-4 flex-1">
+            <div className="w-full max-w-3xl space-y-3 py-12">
+              {components[activeComponent]}
+            </div>
+          </div>
+          <div className="justify-center pb-6 items-center flex">
+            <PromptBox />
+          </div>
         </main>
       </div>
     </>
