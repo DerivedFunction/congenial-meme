@@ -10,6 +10,9 @@ interface DbJsonResponse {
 const DatabasePage = () => {
   const [tables, setTables] = useState<string[]>([]);
   const [results, setResults] = useState<any[]>([]);
+  const [order, setOrder] = useState(
+    "rank firstName mi lastName edipi bilmos pmos dor desc"
+  );
   const fetchTables = async () => {
     try {
       const response = await fetch("/tables");
@@ -49,44 +52,60 @@ const DatabasePage = () => {
   
 
   return (
-      <div>
-        <h1 className="text-2xl font-bold">SQLite DB Manager</h1>
+    <div>
+      <h1 className="text-2xl font-bold">SQLite DB Manager</h1>
 
-        <div className="w-full flex justify-end">
-          <button
-            className="p-2 border-1 rounded-md border-gray-300 text-gray-600 dark:border-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
-            onClick={fetchTables}
-          >
-            Fetch Tables
-          </button>
+      <div className="w-full flex justify-end">
+        <button
+          className="p-2 border-1 rounded-md border-gray-300 text-gray-600 dark:border-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
+          onClick={fetchTables}
+        >
+          Fetch Tables
+        </button>
       </div>
       <div>
-      {tables.map((table) => (
+        {tables.map((table) => (
           <button
             key={table}
             className="p-2 border-1 rounded-md border-gray-300 text-gray-600 dark:border-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 mr-2 mt-2"
             onClick={() => {
-              const query = document.getElementById("query") as HTMLTextAreaElement;
+              const query = document.getElementById(
+                "query"
+              ) as HTMLTextAreaElement;
               query.value = `SELECT * FROM ${table};`;
               runQuery();
             }}
           >
-            {table}
+            {table.toUpperCase()}
           </button>
         ))}
       </div>
-      
-        <h2 className="text-xl font-semibold mt-4">SQL Query</h2>
-        <textarea id="query" className="w-full p-2 mt-2 resize-none border-2 rounded-md border-gray-300 text-gray-600 dark:border-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"></textarea>
-        <div className="mt-4">
-          <button className="p-2 border-1 rounded-md border-gray-300 text-gray-600 dark:border-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
-            onClick={runQuery}>
-            Run Query
-          </button>
+
+      <h2 className="text-xl font-semibold mt-4">SQL Query</h2>
+      <textarea
+        id="query"
+        className="w-full p-2 mt-2 resize-none border-2 rounded-md border-gray-300 text-gray-600 dark:border-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
+      ></textarea>
+      <div className="flex w-full">
+        <span className="p-2 mt-2">Order: </span>
+        <input
+          type="text"
+          defaultValue={order}
+          onChange={(e) => setOrder(e.target.value)}
+          className="w-full p-2 mt-2 resize-none border-2 rounded-md border-gray-300 text-gray-600 dark:border-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
+        ></input>
       </div>
-      <ResultsTable data={results} />
+      <div className="mt-4">
+        <button
+          className="p-2 border-1 rounded-md border-gray-300 text-gray-600 dark:border-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
+          onClick={runQuery}
+        >
+          Run Query
+        </button>
       </div>
-    );
+      <ResultsTable data={results} order={ order} />
+    </div>
+  );
 };
 
 

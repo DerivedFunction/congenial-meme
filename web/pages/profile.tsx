@@ -1,84 +1,82 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { useEffect, useState } from "react";
 import DetailItem from "../components/detail-card";
 
 const ProfilePage = () => {
-  // Pull user from localStorage
-  let user = JSON.parse(localStorage.getItem("user") || "{}");
+  const [user, setUser] = useState<any>(null);
 
-  if (!user || !user.edipi) {
-    // Ask user for EDIPI
+  useEffect(() => {
+    const storedUser = localStorage.getItem("user");
+
+    if (storedUser) {
+      try {
+        const parsedUser = JSON.parse(storedUser);
+        if (parsedUser?.edipi) {
+          setUser(parsedUser);
+          return;
+        }
+      } catch (e) {
+        console.error("Error parsing user from localStorage:", e);
+      }
+    }
+
+    // Ask for EDIPI
     const edipi = prompt("Please enter your EDIPI:");
-    // send a GET request to /users/<EDIPI>
-    // ALLOW CORS
-    fetch(`/users/${edipi}`, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        "Access-Control-Allow-Origin": "*",
-      },
-    })
-      .then((response) => response.json())
+    if (!edipi) return;
+
+    fetch(`/users/${edipi}`)
+      .then((res) => res.json())
       .then((data) => {
         localStorage.setItem("user", JSON.stringify(data));
-        user = data;
+        setUser(data);
       })
-      .catch((error) => console.error("Error fetching user:", error))
-      .then(() => {
-        user = null;
-      });
-  } else {
-    console.log(user);
-  }
-  if (!user) {
-    user = {
-      firstName: "FirstName",
-      lastName: "LastName",
-      mi: "MI",
-      edipi: "1234567890",
-      bilmos: "BILMOS123",
-      pmos: "PMOS123",
-      rank: "PFC",
-      dor: "20220101", // Date of Rank in YYYYMMDD format
-      id: "0", // Placeholder for user ID
-    };
-  }
+      .catch((error) => console.error("Error fetching user:", error));
+  }, []);
+
+  // Default fallback user (optional)
+  const displayUser = user ?? {
+    firstName: "FirstName",
+    lastName: "LastName",
+    mi: "MI",
+    edipi: "1234567890",
+    bilmos: "0000",
+    pmos: "0000",
+    rank: "PFC",
+    dor: "20250101",
+    id: "0",
+  };
+
   return (
-    <>
-      <div className="p-4">
-        {/* Current User */}
-        <div className="mt-6 p-6 rounded-xl shadow-md border border-gray-100">
-          <h2 className="text-2xl font-bold mb-4 pb-2 border-b border-gray-200">
-            Current User
-          </h2>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* User Profile Header */}
-            <div className="md:col-span-2 flex items-center space-x-4 mb-4">
-              <div className="bg-blue-100 text-blue-800 rounded-full w-12 h-12 flex items-center justify-center font-bold text-lg">
-                {user.firstName.charAt(0)}
-                {user.lastName.charAt(0)}
-              </div>
-              <div>
-                <h3 className="text-xl font-semibold ">
-                  {user.rank} {user.firstName} {user.mi && `${user.mi}.`}{" "}
-                  {user.lastName}
-                </h3>
-                <p className="">EDIPI: {user.edipi}</p>
-              </div>
+    <div className="p-4">
+      <div className="mt-6 p-6 rounded-xl shadow-md border border-gray-100">
+        <h2 className="text-2xl font-bold mb-4 pb-2 border-b border-gray-200">
+          Current User
+        </h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="md:col-span-2 flex items-center space-x-4 mb-4">
+            <div className="bg-blue-100 text-blue-800 rounded-full w-12 h-12 flex items-center justify-center font-bold text-lg">
+              {displayUser.firstName.charAt(0)}
+              {displayUser.lastName.charAt(0)}
             </div>
-
-            {/* User Details Grid */}
-            <DetailItem label="BILMOS" value={user.bilmos} />
-            <DetailItem label="PMOS" value={user.pmos} />
-            <DetailItem label="Rank" value={user.rank} />
-            <DetailItem label="DOR" value={formatDate(user.dor)} />
+            <div>
+              <h3 className="text-xl font-semibold">
+                {displayUser.rank} {displayUser.firstName}{" "}
+                {displayUser.mi && `${displayUser.mi}.`} {displayUser.lastName}
+              </h3>
+              <p>EDIPI: {displayUser.edipi}</p>
+            </div>
           </div>
+
+          <DetailItem label="BILMOS" value={displayUser.bilmos} />
+          <DetailItem label="PMOS" value={displayUser.pmos} />
+          <DetailItem label="Rank" value={displayUser.rank} />
+          <DetailItem label="DOR" value={formatDate(displayUser.dor)} />
         </div>
       </div>
-    </>
+    </div>
   );
 };
 
-// Date formatter helper
 function formatDate(dateNum: string): string {
   const dateStr = dateNum.toString();
   if (dateStr.length !== 8) return dateNum;
@@ -89,4 +87,5 @@ function formatDate(dateNum: string): string {
 
   return `${month}/${day}/${year}`;
 }
+
 export default ProfilePage;

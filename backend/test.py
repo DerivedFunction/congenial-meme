@@ -142,7 +142,7 @@ class ApiTestCLI(cmd.Cmd):
     def do_get_all_mos_desc(self, arg):
         """Fetch all mos descriptions: get_all_mos_desc"""
         try:
-            response = requests.get(f"{self.base_url}/mosdesc")
+            response = requests.get(f"{self.base_url}/mos")
             response.raise_for_status()
             self._print_response(response)
         except requests.RequestException as e:
@@ -153,7 +153,7 @@ class ApiTestCLI(cmd.Cmd):
             print("Error: Please provide a bilmos")
             return
         try:
-            response = requests.get(f"{self.base_url}/mosdesc/{arg}")
+            response = requests.get(f"{self.base_url}/mos/{arg}")
             response.raise_for_status()
             self._print_response(response)
         except requests.RequestException as e:
@@ -170,7 +170,7 @@ class ApiTestCLI(cmd.Cmd):
         }
 
         try:
-            response = requests.post(f"{self.base_url}/mosdesc", json=data)
+            response = requests.post(f"{self.base_url}/mos", json=data)
             response.raise_for_status()
             self._print_response(response)
         except requests.RequestException as e:
@@ -188,7 +188,7 @@ class ApiTestCLI(cmd.Cmd):
         }
 
         try:
-            response = requests.put(f"{self.base_url}/mosdesc/{arg}", json=data)
+            response = requests.put(f"{self.base_url}/mos/{arg}", json=data)
             response.raise_for_status()
             self._print_response(response)
         except requests.RequestException as e:
@@ -200,7 +200,7 @@ class ApiTestCLI(cmd.Cmd):
             print("Error: Please provide a bilmos")
             return
         try:
-            response = requests.delete(f"{self.base_url}/mosdesc/{arg}")
+            response = requests.delete(f"{self.base_url}/mos/{arg}")
             response.raise_for_status()
             self._print_response(response)
         except requests.RequestException as e:
@@ -250,7 +250,7 @@ class ApiTestCLI(cmd.Cmd):
             comments = "asfsafasdf"
             
             # Fetch MOS description
-            response = requests.get(f"{self.base_url}/mosdesc/{user.get('bilmos')}")
+            response = requests.get(f"{self.base_url}/mos/{user.get('bilmos')}")
             response.raise_for_status()
             mos_desc = response.json()
             
@@ -276,7 +276,7 @@ class ApiTestCLI(cmd.Cmd):
                 "EDIT_Billet": senior.get('billet'),
                 "EDIT_TOPICS": topics,
                 "EDIT_EVENTS": events,
-                "EDIT_MOSDESC": mos_desc.get('desc'),
+                "EDIT_mos": mos_desc.get('desc'),
                 "EDIT_EVAL": eval,
                 "EDIT_TASKS": goals,
                 "EDIT_COMMENTS": comments

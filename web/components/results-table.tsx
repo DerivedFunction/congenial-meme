@@ -1,11 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import React from "react";
-
 interface ResultsTableProps {
+  order: string;
   data: any[];
 }
 
-const ResultsTable: React.FC<ResultsTableProps> = ({ data }) => {
+const ResultsTable: React.FC<ResultsTableProps> = ({ order, data }) => {
   if (!data || data.length === 0) return null;
 
   const lastResult = data[data.length - 1];
@@ -13,22 +12,49 @@ const ResultsTable: React.FC<ResultsTableProps> = ({ data }) => {
     return <p>No results</p>;
   }
 
-  const columns = Object.keys(lastResult[0]);
+  // Get raw columns from the data
+  const rawColumns = Object.keys(lastResult[0]);
+  console.log(rawColumns)
+
+  // Split order string and filter to only include columns that exist in rawColumns
+  const orderColumns = order
+    .split(" ")
+    .filter((col) => col.trim() && rawColumns.includes(col));
+
+  // Create a map for column order
+  const orderMap = new Map<string, number>();
+  orderColumns.forEach((col, index) => {
+    orderMap.set(col, index);
+  });
+
+
+  // Sort columns: prioritize orderMap index, then alphabetical for unspecified columns
+  const columns = rawColumns.sort((a, b) => {
+    const aIndex = orderMap.has(a) ? orderMap.get(a)! : 999;
+    const bIndex = orderMap.has(b) ? orderMap.get(b)! : 999;
+    if (aIndex !== bIndex) {
+      return aIndex - bIndex; // Sort by orderMap index
+    }
+    return a.localeCompare(b); // Alphabetical sort for unspecified columns
+  });
+  console.log("orderColumns:", orderColumns);
+  console.log("orderMap:", Array.from(orderMap.entries()));
+  console.log("sorted columns:", columns);
 
   return (
-    <div className="mt-2">
+    <div className="mt-2 overflow-x-auto">
       <table className="w-full border-collapse border border-gray-300 dark:border-gray-600">
         <thead>
           <tr className="bg-gray-100 dark:bg-gray-700">
-            <th className="border border-gray-300 dark:border-gray-600 p-2">
+            <th className="border border-gray-300 dark:border-gray-600 p-2 text-left">
               #
             </th>
             {columns.map((col) => (
               <th
                 key={col}
-                className="border border-gray-300 dark:border-gray-600 p-2"
+                className="border border-gray-300 dark:border-gray-600 p-2 text-left"
               >
-                {col}
+                {col.toUpperCase()}
               </th>
             ))}
           </tr>
@@ -44,25 +70,15 @@ const ResultsTable: React.FC<ResultsTableProps> = ({ data }) => {
                   key={col}
                   className="border border-gray-300 dark:border-gray-600 p-2"
                 >
-                  {row[col] !== null ? row[col] : "NULL"}
+                  {row[col] !== null && row[col] !== undefined
+                    ? row[col]
+                    : "NULL"}
                 </td>
               ))}
             </tr>
           ))}
         </tbody>
       </table>
-
-      <div className="mt-2 flex space-x-2">
-        <button className="p-2 bg-green-500 text-white rounded-md">
-          Download CSV
-        </button>
-        <button className="p-2 bg-green-500 text-white rounded-md">
-          Download JSON
-        </button>
-        <button className="p-2 bg-purple-500 text-white rounded-md">
-          Download MD Table
-        </button>
-      </div>
     </div>
   );
 };

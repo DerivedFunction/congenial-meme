@@ -92,14 +92,14 @@ def get_users_by_mos(bilmos):
     db.close()
     return jsonify(users)
 
-@app.route('/mosdesc', methods=['GET'])
+@app.route('/mos', methods=['GET'])
 def get_all_mos_desc():
     db.connect()
     mos_desc = db.get_all_mos_desc()
     db.close()
     return jsonify(mos_desc)
 
-@app.route('/mosdesc/<bilmos>', methods=['GET'])
+@app.route('/mos/<bilmos>', methods=['GET'])
 def get_mos_desc_by_bilmos(bilmos):
     db.connect()
     bilmos = str(bilmos)
@@ -108,7 +108,7 @@ def get_mos_desc_by_bilmos(bilmos):
     if mos_desc:
         return jsonify(mos_desc)
 
-@app.route('/mosdesc', methods=['POST'])
+@app.route('/mos', methods=['POST'])
 def insert_mos_desc():
     data = request.get_json()
     db.connect()
@@ -122,7 +122,7 @@ def insert_mos_desc():
     except sqlite3.Error as e:
         db.close()
 
-@app.route('/mosdesc/<bilmos>', methods=['PUT'])
+@app.route('/mos/<bilmos>', methods=['PUT'])
 def update_mos_desc(bilmos):
     data = request.get_json()
     db.connect()
@@ -138,7 +138,7 @@ def update_mos_desc(bilmos):
         db.close()
         return jsonify({"error": str(e)}), 400
 
-@app.route('/mosdesc/<bilmos>', methods=['DELETE'])
+@app.route('/mos/<bilmos>', methods=['DELETE'])
 def delete_mos_desc(bilmos):
     bilmos = str(bilmos)
     db.connect()

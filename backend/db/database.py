@@ -20,7 +20,7 @@ class Database:
     def create_table(self):
         """Create tables if they don't exist."""
         self.cursor.execute('''
-            CREATE TABLE IF NOT EXISTS users (
+            CREATE TABLE IF NOT EXISTS roster (
                 rank TEXT NOT NULL,
                 firstName TEXT NOT NULL,
                 lastName TEXT NOT NULL,
@@ -32,18 +32,18 @@ class Database:
             )
         ''')
         self.cursor.execute('''
-           CREATE TABLE IF NOT EXISTS mosdesc (
+           CREATE TABLE IF NOT EXISTS mos (
                bilmos CHAR(4) PRIMARY KEY CHECK (LENGTH(bilmos) = 4 AND bilmos GLOB '[0-9][0-9][0-9][0-9]'),
                desc TEXT NOT NULL,
-               FOREIGN KEY (bilmos) REFERENCES users(bilmos)
+               FOREIGN KEY (bilmos) REFERENCES roster(bilmos)
            )
         ''')
         self.conn.commit()
 
     def insert_user(self, rank, firstName, lastName, mi, edipi, dor, pmos, bilmos):
-        """Insert a new user into the users table."""
+        """Insert a new user into the roster table."""
         self.cursor.execute('''
-            INSERT INTO users (rank, firstName, lastName, mi, edipi, dor, pmos, bilmos)
+            INSERT INTO roster (rank, firstName, lastName, mi, edipi, dor, pmos, bilmos)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         ''', (rank, firstName, lastName, mi, edipi, dor, pmos, bilmos))
         self.conn.commit()
@@ -51,7 +51,7 @@ class Database:
     def update_user(self, rank, firstName, lastName, mi, edipi, dor, pmos, bilmos):
         """Update a user by edipi."""
         self.cursor.execute('''
-            UPDATE users
+            UPDATE roster
             SET rank = ?, firstName = ?, lastName = ?, mi = ?, dor = ?, pmos = ?, bilmos = ?
             WHERE edipi = ?
         ''', (rank, firstName, lastName, mi, dor, pmos, bilmos, edipi))
@@ -60,51 +60,52 @@ class Database:
     def delete_user(self, edipi):
         """Delete a user by edipi."""
         self.cursor.execute('''
-            DELETE FROM users
+            DELETE FROM roster
             WHERE edipi = ?
         ''', (edipi,))
         self.conn.commit()
 
     def get_user_by_edipi(self, edipi):
+        edipi = str(edipi)
         """Get a user by edipi, return as dictionary."""
         self.cursor.execute('''
-            SELECT * FROM users
+            SELECT * FROM roster
             WHERE edipi = ?
         ''', (edipi,))
         row = self.cursor.fetchone()
         return dict(row) if row else None
 
-    def get_all_users(self):
-        """Get all users, return as list of dictionaries."""
+    def get_all_roster(self):
+        """Get all roster, return as list of dictionaries."""
         self.cursor.execute('''
-            SELECT * FROM users
+            SELECT * FROM roster
         ''')
         rows = self.cursor.fetchall()
         return [dict(row) for row in rows]
 
-    def get_all_users_by_rank(self, rank):
-        """Get all users by rank, return as list of dictionaries."""
+    def get_all_roster_by_rank(self, rank):
+        """Get all roster by rank, return as list of dictionaries."""
         self.cursor.execute('''
-            SELECT * FROM users
+            SELECT * FROM roster
             WHERE rank = ?
         ''', (rank,))
         rows = self.cursor.fetchall()
         return [dict(row) for row in rows]
 
-    def get_all_users_by_mos(self, bilmos):
-        """Get all users by bilmos, return as list of dictionaries."""
+    def get_all_roster_by_mos(self, bilmos):
+        """Get all roster by bilmos, return as list of dictionaries."""
         bilmos = str(bilmos)
         self.cursor.execute('''
-            SELECT * FROM users
+            SELECT * FROM roster
             WHERE bilmos = ?
         ''', (bilmos,))
         rows = self.cursor.fetchall()
         return [dict(row) for row in rows]
     def insert_mos_desc(self, bilmos, desc):
-        """Insert a new mos description into the mosdesc table."""
+        """Insert a new mos description into the mos table."""
         bilmos = str(bilmos)
         self.cursor.execute('''
-            INSERT INTO mosdesc (bilmos, desc)
+            INSERT INTO mos (bilmos, desc)
             VALUES (?, ?)
         ''', (bilmos, desc))
         self.conn.commit()
@@ -112,7 +113,7 @@ class Database:
         """Update a mos description by bilmos."""
         bilmos = str(bilmos)
         self.cursor('''
-            UPDATE mosdesc
+            UPDATE mos
             SET desc = ?
             WHERE bilmos = ?
         ''', (desc, bilmos))
@@ -121,7 +122,7 @@ class Database:
         """Delete a mos description by bilmos."""
         bilmos = str(bilmos)
         self.cursor.execute('''
-            DELETE FROM mosdesc
+            DELETE FROM mos
             WHERE bilmos = ?
         ''', (bilmos,))
         self.conn.commit()
@@ -129,7 +130,7 @@ class Database:
         """Get MOS description by bilmos, return as dictionary."""
         bilmos = str(bilmos)
         self.cursor.execute('''
-            SELECT * FROM mosdesc
+            SELECT * FROM mos
             WHERE bilmos = ?
         ''', (bilmos,))
         row = self.cursor.fetchone()
@@ -137,7 +138,7 @@ class Database:
     def get_all_mos_desc(self):
         """Get all mos descriptions, return as list of dictionaries."""
         self.cursor.execute('''
-            SELECT * FROM mosdesc
+            SELECT * FROM mos
         ''')
         return [dict(row) for row in self.cursor.fetchall()]
     def get_all_tables(self):
