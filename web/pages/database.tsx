@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState } from "react";
 
 // Type for db.json response
@@ -5,24 +6,11 @@ interface DbJsonResponse {
   tables: string[];
 }
 
-// Type for table row data (flexible for any key-value pairs)
-interface TableRow {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  [key: string]: any; // Allows for dynamic columns like firstName, lastName, etc.
-}
-
-// Type for tableData state
-interface TableData {
-  [tableName: string]: TableRow[];
-}
-
 const DatabasePage = () => {
   const [tables, setTables] = useState<string[]>([]);
-  const [tableData, setTableData] = useState<TableData>({});
-
   const fetchTables = async () => {
     try {
-      const response = await fetch("/static/db.json");
+      const response = await fetch("/tables");
       if (!response.ok) {
         throw new Error("Network response was not ok");
       }
@@ -32,108 +20,122 @@ const DatabasePage = () => {
       }
       console.log("Tables fetched:", data.tables);
       setTables(data.tables);
-
-      // Fetch data for each table
-      const tableDataPromises = data.tables.map(async (table: string) => {
-        try {
-          const tableResponse = await fetch(`/${table}`);
-          if (!tableResponse.ok) {
-            throw new Error(`Failed to fetch table: ${table}`);
-          }
-          const tableData: TableRow[] = await tableResponse.json();
-          return { tableName: table, data: tableData };
-        } catch (error) {
-          console.error(`Error fetching table ${table}:`, error);
-          return { tableName: table, data: [] };
-        }
-      });
-
-      const results = await Promise.all(tableDataPromises);
-      const newTableData = results.reduce(
-        (acc, { tableName, data }) => ({
-          ...acc,
-          [tableName]: data,
-        }),
-        {} as TableData
-      );
-      setTableData(newTableData);
     } catch (error) {
-      console.error("Failed to fetch tables:", error);
+      console.error("Error fetching tables:", error);
     }
   };
+  const runQuery = async () => {
+    try {
+      const query = document.getElementById("query") as HTMLTextAreaElement;
+      const queryValue = query.value;
+      console.log("Query value:", queryValue);
+      const response = await fetch("/query", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ query: queryValue }),
+      });
+      if (!response.ok) throw new Error("Query failed");
+      const data = await response.json();
+      console.log("Query result:", data); // return array object ex. [[{name:""},{name:""}], [{name:""},{name:""}]], each array is the result of each statement
+      generateTable(data);
+    } catch (error) {
+      console.error("Error fetching tables:", error);
+    }
+  };
+  
+  const generateTable = (data: any[]) => {
+    const resultsDiv = document.getElementById("results");
+    if (!resultsDiv || data.length === 0) return;
 
-  // Component to render a single table
-  const TableView: React.FC<{ tableName: string; data: TableRow[] }> = ({
-    tableName,
-    data,
-  }) => {
-    if (!data || data.length === 0) {
-      return <div>No data available for {tableName}</div>;
+    // Get the last array (last executed statement)
+    const lastResult = data[data.length - 1];
+    if (!lastResult || lastResult.length === 0) {
+      resultsDiv.innerHTML = "<p>No results</p>";
+      return;
     }
 
-    // Get column headers from the first row
-    const columns = Object.keys(data[0]);
+    // Get column names from the first row
+    const columns = Object.keys(lastResult[0]);
+    let tableHTML =
+      "<table class='w-full mt-2 border-collapse border border-gray-300 dark:border-gray-600'><thead><tr class='bg-gray-100 dark:bg-gray-700'>";
 
-    return (
-      <div className="mt-4">
-        <h3 className="text-lg font-semibold mb-2">{tableName}</h3>
-        <table className="w-full border-collapse">
-          <thead>
-            <tr>
-              {columns.map((column) => (
-                <th key={column} className="border p-2">
-                  {column}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {data.map((row, index) => (
-              <tr key={index}>
-                {columns.map((column) => (
-                  <td key={column} className="border p-2">
-                    {row[column] ?? "N/A"} {/* Handle undefined/null values */}
-                  </td>
-                ))}
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    );
+    // Add column headers
+    tableHTML +=
+      "<th class='border border-gray-300 dark:border-gray-600 p-2'>#</th>";
+    columns.forEach((col) => {
+      tableHTML += `<th class='border border-gray-300 dark:border-gray-600 p-2'>${col}</th>`;
+    });
+    tableHTML += "</tr></thead><tbody>";
+
+    // Add rows
+    lastResult.forEach((row: any, index: number) => {
+      tableHTML += "<tr class='hover:bg-gray-50 dark:hover:bg-gray-700'>";
+      tableHTML += `<td class='border border-gray-300 dark:border-gray-600 p-2'>${
+        index + 1
+      }</td>`;
+      columns.forEach((col) => {
+        tableHTML += `<td class='border border-gray-300 dark:border-gray-600 p-2'>${
+          row[col] !== null ? row[col] : "NULL"
+        }</td>`;
+      });
+      tableHTML += "</tr>";
+    });
+
+    tableHTML += "</tbody></table>";
+    resultsDiv.innerHTML = tableHTML;
+
+    // Add download buttons
+    resultsDiv.innerHTML += `
+      <div class="mt-2 flex space-x-2">
+        <button class="p-2 bg-green-500 text-white rounded-md">Download CSV</button>
+        <button class="p-2 bg-green-500 text-white rounded-md">Download JSON</button>
+        <button class="p-2 bg-purple-500 text-white rounded-md">Download MD Table</button>
+      </div>`;
   };
+  
 
   return (
-    <div className="flex">
-      {/* Main content */}
-      <div className="flex-1 p-4">
-        <h1>SQLite DB Management</h1>
-        <div className="flex flex-col space-y-4">
+      <div>
+        <h1 className="text-2xl font-bold">SQLite DB Manager</h1>
+
+        <div className="w-full flex justify-end">
           <button
+            className="p-2 border-1 rounded-md border-gray-300 text-gray-600 dark:border-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
             onClick={fetchTables}
-            className="bg-blue-500 text-white p-2 rounded-md hover:bg-blue-600 transition-colors"
           >
             Fetch Tables
           </button>
-          {/* Render all table data */}
-          {Object.entries(tableData).map(([tableName, data]) => (
-            <TableView key={tableName} tableName={tableName} data={data} />
-          ))}
-        </div>
       </div>
-      {/* Right sidebar */}
-      <div className="w-64 p-4 bg-gray-100">
-        <h2 className="text-lg font-semibold">Tables</h2>
-        <ul className="list-disc pl-5">
-          {tables.map((table, index) => (
-            <li key={index} className="py-1">
-              {table}
-            </li>
-          ))}
-        </ul>
+      <div>
+      {tables.map((table) => (
+          <button
+            key={table}
+            className="p-2 border-1 rounded-md border-gray-300 text-gray-600 dark:border-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 mr-2 mt-2"
+            onClick={() => {
+              const query = document.getElementById("query") as HTMLTextAreaElement;
+              query.value = `SELECT * FROM ${table};`;
+              runQuery();
+            }}
+          >
+            {table}
+          </button>
+        ))}
       </div>
-    </div>
-  );
+      
+        <h2 className="text-xl font-semibold mt-4">SQL Query</h2>
+        <textarea id="query" className="w-full p-2 mt-2 resize-none border-2 rounded-md border-gray-300 text-gray-600 dark:border-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"></textarea>
+        <div className="mt-4">
+          <button className="p-2 border-1 rounded-md border-gray-300 text-gray-600 dark:border-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
+            onClick={runQuery}>
+            Run Query
+          </button>
+      </div>
+      <div id="results"></div>
+      </div>
+    );
 };
+
 
 export default DatabasePage;

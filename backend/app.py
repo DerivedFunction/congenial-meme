@@ -163,6 +163,37 @@ def fill_counseling():
         as_attachment=True,
         download_name='filled_counseling.docx'
     )
+@app.route('/tables', methods=['GET'])
+def get_all_tables():
+    try:
+        db.connect()
+        tables = db.get_all_tables()
+        db.close()
+        return jsonify(tables), 200
+    except sqlite3.Error as e:
+        db.close()
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/query', methods=['POST'])
+def run_query():
+    try:
+        statement = request.get_json()['query']
+        db.connect()
+        # parse the statement for multiple queries
+        queries = statement.split(';')
+        results = []
+        for query in queries:
+            query = query.strip()
+            if query:
+                result = db.run_query(query)
+                results.append(result)
+        db.close()
+        return jsonify(results), 200
+    except sqlite3.Error as e:
+        db.close()
+        return jsonify({"error": str(e)}), 500
+
+
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)

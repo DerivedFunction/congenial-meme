@@ -21,12 +21,11 @@ class Database:
         """Create tables if they don't exist."""
         self.cursor.execute('''
             CREATE TABLE IF NOT EXISTS users (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
                 rank TEXT NOT NULL,
                 firstName TEXT NOT NULL,
                 lastName TEXT NOT NULL,
                 mi TEXT,
-                edipi CHAR(10) NOT NULL UNIQUE CHECK (LENGTH(edipi) = 10 AND edipi GLOB '[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]'),
+                edipi CHAR(10) PRIMARY KEY CHECK (LENGTH(edipi) = 10 AND edipi GLOB '[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]'),
                 dor INTEGER NOT NULL,
                 pmos CHAR(4) NOT NULL CHECK (LENGTH(pmos) = 4 AND pmos GLOB '[0-9][0-9][0-9][0-9]'),
                 bilmos CHAR(4) NOT NULL CHECK (LENGTH(bilmos) = 4 AND bilmos GLOB '[0-9][0-9][0-9][0-9]')
@@ -141,3 +140,27 @@ class Database:
             SELECT * FROM mosdesc
         ''')
         return [dict(row) for row in self.cursor.fetchall()]
+    def get_all_tables(self):
+        """Get all tables in the database.
+            returns as an array of table names.
+            {
+                "tables": [
+                    "table1",
+                    "table2"
+                ]
+            }
+        """
+        self.cursor.execute("""SELECT name FROM sqlite_master 
+                            WHERE type='table'
+                            AND name NOT LIKE 'sqlite_%';
+                        """)
+        tables = [row[0] for row in self.cursor.fetchall()]
+        return {"tables": tables}
+    def run_query(self, query):
+        """
+        Runs any query on the database.
+        """
+        self.cursor.execute(query)
+        rows = self.cursor.fetchall()
+        return [dict(row) for row in rows]
+    

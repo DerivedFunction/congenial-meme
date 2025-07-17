@@ -22,7 +22,7 @@ function App() {
   };
   return (
     <>
-      <div className="relative flex h-screen overflow-hidden">
+      <div className="relative flex h-screen overflow-hidden w-full">
         <div className="md:hidden fixed top-1 left-1 z-[60]">
           {!expand && (
             <button
@@ -46,11 +46,11 @@ function App() {
           }`}
         >
           <div className="flex items-start justify-center p-4 flex-1 overflow-y-auto">
-            <div className="w-full max-w-3xl space-y-3 py-12 ">
+            <div className="w-full space-y-3 py-4 ">
               {components[activeComponent]}
             </div>
           </div>
-          <div className="justify-center pb-6 items-center flex">
+          <div className="justify-center pb-6 items-center hidden mr-2 ml-2">
             <PromptBox />
           </div>
         </main>
