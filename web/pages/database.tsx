@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState } from "react";
+import ResultsTable from "../components/results-table";
 
 // Type for db.json response
 interface DbJsonResponse {
@@ -8,6 +9,7 @@ interface DbJsonResponse {
 
 const DatabasePage = () => {
   const [tables, setTables] = useState<string[]>([]);
+  const [results, setResults] = useState<any[]>([]);
   const fetchTables = async () => {
     try {
       const response = await fetch("/tables");
@@ -38,61 +40,11 @@ const DatabasePage = () => {
       });
       if (!response.ok) throw new Error("Query failed");
       const data = await response.json();
+      setResults(data);
       console.log("Query result:", data); // return array object ex. [[{name:""},{name:""}], [{name:""},{name:""}]], each array is the result of each statement
-      generateTable(data);
     } catch (error) {
       console.error("Error fetching tables:", error);
     }
-  };
-  
-  const generateTable = (data: any[]) => {
-    const resultsDiv = document.getElementById("results");
-    if (!resultsDiv || data.length === 0) return;
-
-    // Get the last array (last executed statement)
-    const lastResult = data[data.length - 1];
-    if (!lastResult || lastResult.length === 0) {
-      resultsDiv.innerHTML = "<p>No results</p>";
-      return;
-    }
-
-    // Get column names from the first row
-    const columns = Object.keys(lastResult[0]);
-    let tableHTML =
-      "<table class='w-full mt-2 border-collapse border border-gray-300 dark:border-gray-600'><thead><tr class='bg-gray-100 dark:bg-gray-700'>";
-
-    // Add column headers
-    tableHTML +=
-      "<th class='border border-gray-300 dark:border-gray-600 p-2'>#</th>";
-    columns.forEach((col) => {
-      tableHTML += `<th class='border border-gray-300 dark:border-gray-600 p-2'>${col}</th>`;
-    });
-    tableHTML += "</tr></thead><tbody>";
-
-    // Add rows
-    lastResult.forEach((row: any, index: number) => {
-      tableHTML += "<tr class='hover:bg-gray-50 dark:hover:bg-gray-700'>";
-      tableHTML += `<td class='border border-gray-300 dark:border-gray-600 p-2'>${
-        index + 1
-      }</td>`;
-      columns.forEach((col) => {
-        tableHTML += `<td class='border border-gray-300 dark:border-gray-600 p-2'>${
-          row[col] !== null ? row[col] : "NULL"
-        }</td>`;
-      });
-      tableHTML += "</tr>";
-    });
-
-    tableHTML += "</tbody></table>";
-    resultsDiv.innerHTML = tableHTML;
-
-    // Add download buttons
-    resultsDiv.innerHTML += `
-      <div class="mt-2 flex space-x-2">
-        <button class="p-2 bg-green-500 text-white rounded-md">Download CSV</button>
-        <button class="p-2 bg-green-500 text-white rounded-md">Download JSON</button>
-        <button class="p-2 bg-purple-500 text-white rounded-md">Download MD Table</button>
-      </div>`;
   };
   
 
@@ -132,7 +84,7 @@ const DatabasePage = () => {
             Run Query
           </button>
       </div>
-      <div id="results"></div>
+      <ResultsTable data={results} />
       </div>
     );
 };
