@@ -28,7 +28,8 @@ class Database:
                 EDIPI CHAR(10) PRIMARY KEY CHECK (LENGTH(EDIPI) = 10 AND EDIPI GLOB '[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]'),
                 DOR INTEGER NOT NULL,
                 PMOS CHAR(4) NOT NULL CHECK (LENGTH(PMOS) = 4 AND PMOS GLOB '[0-9][0-9][0-9][0-9]'),
-                BILMOS CHAR(4) NOT NULL CHECK (LENGTH(BILMOS) = 4 AND BILMOS GLOB '[0-9][0-9][0-9][0-9]')
+                BILMOS CHAR(4) NOT NULL CHECK (LENGTH(BILMOS) = 4 AND BILMOS GLOB '[0-9][0-9][0-9][0-9]'),
+                BILLET TEXT
             )
         ''')
         self.cursor.execute('''
@@ -40,21 +41,21 @@ class Database:
         ''')
         self.conn.commit()
 
-    def insert_user(self, rank, firstname, lastname, mi, edipi, dor, pmos, bilmos):
+    def insert_user(self, rank, firstname, lastname, mi, edipi, dor, pmos, bilmos, billet):
         """Insert a new user into the roster table."""
         self.cursor.execute('''
-            INSERT INTO roster (RANK, FIRSTNAME, LASTNAME, MI, EDIPI, DOR, PMOS, BILMOS)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-        ''', (rank, firstname, lastname, mi, edipi, dor, pmos, bilmos))
+            INSERT INTO roster (RANK, FIRSTNAME, LASTNAME, MI, EDIPI, DOR, PMOS, BILMOS, BILLET)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ''', (rank, firstname, lastname, mi, edipi, dor, pmos, bilmos, billet))
         self.conn.commit()
 
-    def update_user(self, rank, firstname, lastname, mi, edipi, dor, pmos, bilmos):
+    def update_user(self, rank, firstname, lastname, mi, edipi, dor, pmos, bilmos, billet):
         """Update a user by EDIPI."""
         self.cursor.execute('''
             UPDATE roster
-            SET RANK = ?, FIRSTNAME = ?, LASTNAME = ?, MI = ?, DOR = ?, PMOS = ?, BILMOS = ?
+            SET RANK = ?, FIRSTNAME = ?, LASTNAME = ?, MI = ?, DOR = ?, PMOS = ?, BILMOS = ?, BILLET = ?
             WHERE EDIPI = ?
-        ''', (rank, firstname, lastname, mi, dor, pmos, bilmos, edipi))
+        ''', (rank, firstname, lastname, mi, dor, pmos, bilmos, edipi, billet))
         self.conn.commit()
 
     def delete_user(self, edipi):

@@ -55,6 +55,7 @@ class ApiTestCLI(cmd.Cmd):
         dor = input("Date of Rank (YYYYMMDD): ")
         pmos = input("PMOS (4 digits): ")
         bilmos = input("BILMOS (4 digits): ")
+        billet = input("Billet (optional): ")
 
         data = {
             "rank": rank.upper(),
@@ -64,7 +65,8 @@ class ApiTestCLI(cmd.Cmd):
             "edipi": edipi,
             "dor": int(dor) if dor else 0,
             "pmos": pmos,
-            "bilmos": bilmos
+            "bilmos": bilmos,
+            "billet": billet or ""
         }
 
         try:
@@ -87,6 +89,7 @@ class ApiTestCLI(cmd.Cmd):
         dor = input("Date of Rank (YYYYMMDD): ")
         pmos = input("PMOS (4 digits): ")
         bilmos = input("BILMOS (4 digits): ")
+        billet = input("Billet (optional): ")
 
         data = {
             "rank": rank,
@@ -95,7 +98,8 @@ class ApiTestCLI(cmd.Cmd):
             "mi": mi or "",
             "dor": int(dor) if dor else 0,
             "pmos": pmos,
-            "bilmos": bilmos
+            "bilmos": bilmos,
+            "billet": billet or ""
         }
 
         try:

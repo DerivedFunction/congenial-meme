@@ -2,6 +2,7 @@ import { useState, type JSX } from "react";
 import Sidebar from "./../components/sidebar";
 import DatabasePage from "./../pages/database";
 import ProfilePage from "./../pages/profile";
+import TaskPage from "./../pages/task";
 import PromptBox from "./../components/prompt-box";
 import menu from "./images/menu.svg";
 import "./App.css";
@@ -15,7 +16,7 @@ function App() {
 
   // Component mapping (better than switch statement)
   const components: Record<ComponentKey, JSX.Element> = {
-    newTask: <></>,
+    newTask: <TaskPage />,
     manageDB: <DatabasePage />,
     profilePage: <ProfilePage />,
     // Add other components here

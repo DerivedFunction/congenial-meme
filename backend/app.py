@@ -42,7 +42,8 @@ def insert_user():
             data['edipi'],
             data['dor'],
             data['pmos'],
-            data['bilmos']
+            data['bilmos'],
+            data.get('billet', '')
         )
         db.close()
         return jsonify({"message": "User added successfully"}), 201
@@ -63,7 +64,8 @@ def update_user(edipi):
             edipi,
             data['dor'],
             data['pmos'],
-            data['bilmos']
+            data['bilmos'],
+            data.get('billet', '')
         )
         db.close()
         return jsonify({"message": "User updated successfully"})
@@ -195,6 +197,60 @@ def run_query():
                 results.append(result)
         db.close()
         return jsonify(results), 200
+    except sqlite3.Error as e:
+        db.close()
+        return jsonify({"error": str(e)}), 500
+@app.route('/import/roster', methods=['POST'])
+def import_roster():
+    try:
+        file = request.files['file']
+        if not file:
+            return jsonify({"error": "No file provided"}), 400
+        # Check if it is an CSV file
+        if not file.filename.endswith('.csv'):
+            return jsonify({"error": "File is not a CSV"}), 400
+        db.connect()
+        # Read the CSV file
+        import csv
+        import io
+        csv_file = io.StringIO(file.stream.read().decode('utf-8'))
+        csv_reader = csv.DictReader(csv_file)
+        for row in csv_reader:
+            # Check if required fields are present
+            required_fields = ['rank', 'firstName', 'lastName', 'edipi', 'dor', 'pmos', 'bilmos']
+            for field in required_fields:
+                if field not in row or not row[field]:
+                    row[field] = ''  # Set default value if not present
+            # Check if EDIPI is not already in the database
+            existing_user = db.get_user_by_edipi(row['edipi'])
+            if existing_user:
+                # If it is a duplicate entry (edipi), update it
+                db.update_user(
+                    row['rank'],
+                    row['firstName'],
+                    row['lastName'],
+                    row.get('mi', ''),
+                    row['edipi'],
+                    row['dor'],
+                    row['pmos'],
+                    row['bilmos'],
+                    row.get('billet', '')
+                )
+            else:
+                # Insert each row into the database
+                db.insert_user(
+                    row['rank'],
+                    row['firstName'],
+                    row['lastName'],
+                    row.get('mi', ''),
+                    row['edipi'],
+                    row['dor'],
+                    row['pmos'],
+                    row['bilmos'],
+                    row.get('billet', '')
+                )
+        db.close()
+        return jsonify({"message": "Roster imported successfully"}), 200
     except sqlite3.Error as e:
         db.close()
         return jsonify({"error": str(e)}), 500
