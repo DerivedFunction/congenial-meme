@@ -11,8 +11,9 @@ const DatabasePage = () => {
   const [tables, setTables] = useState<string[]>([]);
   const [results, setResults] = useState<any[]>([]);
   const [order, setOrder] = useState(
-    "rank firstName mi lastName edipi bilmos pmos dor desc"
+    "RANK FIRSTNAME MI LASTNAME EDIPI BILMOS PMOS DOR"
   );
+  const [hide, setHide] = useState("MI PMOS DOR")
   const fetchTables = async () => {
     try {
       const response = await fetch("/tables");
@@ -94,6 +95,13 @@ const DatabasePage = () => {
           onChange={(e) => setOrder(e.target.value)}
           className="w-full p-2 mt-2 resize-none border-2 rounded-md border-gray-300 text-gray-600 dark:border-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
         ></input>
+        <span className="p-2 mt-2">Hide: </span>
+        <input
+          type="text"
+          defaultValue={hide}
+          onChange={(e) => setHide(e.target.value)}
+          className="w-full p-2 mt-2 resize-none border-2 rounded-md border-gray-300 text-gray-600 dark:border-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
+        ></input>
       </div>
       <div className="mt-4">
         <button
@@ -103,7 +111,7 @@ const DatabasePage = () => {
           Run Query
         </button>
       </div>
-      <ResultsTable data={results} order={ order} />
+      <ResultsTable data={results} order={order} hide={ hide} />
     </div>
   );
 };

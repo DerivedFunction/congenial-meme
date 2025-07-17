@@ -1,10 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 interface ResultsTableProps {
   order: string;
+  hide: string;
   data: any[];
 }
 
-const ResultsTable: React.FC<ResultsTableProps> = ({ order, data }) => {
+const ResultsTable: React.FC<ResultsTableProps> = ({ order, data, hide }) => {
   if (!data || data.length === 0) return null;
 
   const lastResult = data[data.length - 1];
@@ -37,9 +38,9 @@ const ResultsTable: React.FC<ResultsTableProps> = ({ order, data }) => {
     }
     return a.localeCompare(b); // Alphabetical sort for unspecified columns
   });
-  console.log("orderColumns:", orderColumns);
-  console.log("orderMap:", Array.from(orderMap.entries()));
-  console.log("sorted columns:", columns);
+
+  // Hide columns: any columns that is in hide will be removed
+  const hideColumns = hide.split(" ").filter((col) => col.trim());
 
   return (
     <div className="mt-2 overflow-x-auto">
@@ -50,12 +51,13 @@ const ResultsTable: React.FC<ResultsTableProps> = ({ order, data }) => {
               #
             </th>
             {columns.map((col) => (
+              !hideColumns.includes(col) ?
               <th
                 key={col}
                 className="border border-gray-300 dark:border-gray-600 p-2 text-left"
               >
-                {col.toUpperCase()}
-              </th>
+                {col}
+              </th> : null
             ))}
           </tr>
         </thead>
@@ -66,6 +68,7 @@ const ResultsTable: React.FC<ResultsTableProps> = ({ order, data }) => {
                 {index + 1}
               </td>
               {columns.map((col) => (
+                 !hideColumns.includes(col) ?
                 <td
                   key={col}
                   className="border border-gray-300 dark:border-gray-600 p-2"
@@ -73,7 +76,7 @@ const ResultsTable: React.FC<ResultsTableProps> = ({ order, data }) => {
                   {row[col] !== null && row[col] !== undefined
                     ? row[col]
                     : "NULL"}
-                </td>
+                </td> : null
               ))}
             </tr>
           ))}

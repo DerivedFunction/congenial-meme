@@ -16,7 +16,7 @@ def home():
 @app.route('/users', methods=['GET'])
 def get_all_users():
     db.connect()
-    users = db.get_all_users()
+    users = db.get_all_roster()
     db.close()
     return jsonify(users)
 
@@ -81,14 +81,14 @@ def delete_user(edipi):
 def get_users_by_rank(rank):
     db.connect()
     rank = rank.upper()
-    users = db.get_all_users_by_rank(rank)
+    users = db.get_all_roster_by_rank(rank)
     db.close()
     return jsonify(users)
 @app.route('/users/mos/<bilmos>', methods=['GET'])
 def get_users_by_mos(bilmos):
     db.connect()
     bilmos = str(bilmos)
-    users = db.get_all_users_by_mos(bilmos)
+    users = db.get_all_roster_by_mos(bilmos)
     db.close()
     return jsonify(users)
 
@@ -140,10 +140,16 @@ def update_mos_desc(bilmos):
 
 @app.route('/mos/<bilmos>', methods=['DELETE'])
 def delete_mos_desc(bilmos):
-    bilmos = str(bilmos)
-    db.connect()
-    db.delete_mos_desc(bilmos)
-    db.close()
+    try:
+        bilmos = str(bilmos)
+        db.connect()
+        db.delete_mos_desc(bilmos)
+        db.close()
+        return jsonify({"message": "MOS description deleted successfully"})
+    except sqlite3.Error as e:
+        db.close()
+        return jsonify({"error": str(e)}), 400
+    
 
 
 @app.route('/fill_counseling', methods=['POST'])
@@ -192,8 +198,6 @@ def run_query():
     except sqlite3.Error as e:
         db.close()
         return jsonify({"error": str(e)}), 500
-
-
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)
